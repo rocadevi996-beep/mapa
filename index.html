@@ -223,9 +223,23 @@
                             <div class="node-text">Consigna características clave:
                                 <ul class="sub-list">
                                     <li>Procesos, zonas y actividades (rutinarias o no).</li>
-                                    <li>Clasificación del peligro y efectos posibles.</li>
+                                    <li>Identificación del peligro y efectos posibles.</li>
                                     <li>Controles existentes (fuente, medio, individuo).</li>
                                 </ul>
+                            </div>
+                        </div>
+
+                        <span id="c-left-3" class="connector-label" contenteditable="true">clasifica los peligros en</span>
+                        <div id="n-hazards" class="node node-teal" contenteditable="true">
+                            <span class="node-title">Clasificación de Peligros (Anexo A)</span>
+                            <div class="node-text">
+                                <strong>• Biológico:</strong> virus, bacterias, hongos.<br>
+                                <strong>• Físico:</strong> ruido, iluminación, vibración, temperatura.<br>
+                                <strong>• Químico:</strong> polvos, gases, vapores, humos, líquidos.<br>
+                                <strong>• Psicosocial:</strong> carga mental, jornada, gestión.<br>
+                                <strong>• Biomecánico:</strong> posturas, esfuerzo, mov. repetitivo.<br>
+                                <strong>• Condiciones de seguridad:</strong> mecánico, eléctrico, locativo, alturas, tránsito.<br>
+                                <strong>• Fenómenos naturales:</strong> sismo, vendaval, inundación.
                             </div>
                         </div>
                     </div>
@@ -286,8 +300,9 @@
             </div>
         </div>
     </div>
+
     <script>
-        const STORAGE_KEY = 'mapa_gtc45_v4';
+                const STORAGE_KEY = 'mapa_gtc45_v5';
         const mapArea = document.getElementById('map-area');
         const mapContent = document.getElementById('map-content');
         const svg = document.getElementById('arrows-svg');
@@ -299,11 +314,13 @@
             ['c-left-1', 'n-instrument'],
             ['n-instrument', 'c-left-2'],
             ['c-left-2', 'n-format'],
+            ['n-format', 'c-left-3'],
+            ['c-left-3', 'n-hazards'],
             ['n-main', 'c-right-1'],
             ['c-right-1', 'n-valuation'],
             ['n-valuation', 'c-right-2'],
             ['c-right-2', 'n-risk-def'],
-            ['n-format', 'c-eval'],
+            ['n-hazards', 'c-eval'],
             ['n-risk-def', 'c-eval'],
             ['c-eval', 'c-prob'],
             ['c-prob', 'n-prob'],
@@ -316,6 +333,7 @@
             ['n-nr', 'c-final'],
             ['c-final', 'n-gestion']
         ];
+
 
         function drawArrows() {
             const w = mapArea.offsetWidth;
