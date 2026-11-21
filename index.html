@@ -1,304 +1,390 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mapa Conceptual Interactivo - GTC 45 (2012)</title>
-  <style>
-    :root {
-      --bg: #f4f7f9;
-      --primary: #0f3d4c;
-      --primary-light: #e3f1f5;
-      --accent: #d97706;
-      --accent-light: #fef3c7;
-      --green: #15803d;
-      --green-light: #dcfce7;
-      --text: #1e293b;
-      --border: #94a3b8;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa Conceptual - GTC 45</title>
+    <script src="https://cloudflare.com"></script>
+    <style>
+        :root {
+            --bg-color: #f4f7f9;
+            --primary: #1e3a8a;
+            --secondary: #2563eb;
+            --accent: #0d9488;
+            --highlight: #d97706;
+            --node-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #475569;
+        }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-    body {
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      padding-bottom: 60px;
-    }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 20px;
+        }
 
-    /* Barra superior de herramientas */
-    .toolbar {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: #ffffff;
-      border-bottom: 1px solid #cbd5e1;
-      padding: 12px 24px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    }
+        .toolbar {
+            max-width: 1350px;
+            margin: 0 auto 20px auto;
+            background: #ffffff;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
 
-    .toolbar h1 {
-      font-size: 1.05rem;
-      color: var(--primary);
-    }
+        .toolbar-info h2 { font-size: 1.15rem; color: var(--primary); }
+        .toolbar-info p { font-size: 0.85rem; color: var(--text-muted); }
+        .toolbar-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 
-    .controls {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
 
-    button {
-      padding: 8px 14px;
-      border: none;
-      border-radius: 6px;
-      font-weight: 600;
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: 0.2s;
-    }
+        .btn-pdf { background-color: var(--primary); color: white; }
+        .btn-pdf:hover { background-color: #172554; }
+        .btn-jpg { background-color: var(--accent); color: white; }
+        .btn-jpg:hover { background-color: #0f766e; }
+        .btn-save { background-color: #e2e8f0; color: var(--text-main); }
+        .btn-save:hover { background-color: #cbd5e1; }
+        .btn-reset { background-color: #fee2e2; color: #b91c1c; }
+        .btn-reset:hover { background-color: #fecaca; }
 
-    .btn-edit { background: var(--primary); color: #fff; }
-    .btn-edit.active { background: var(--accent); color: #fff; }
-    .btn-reset { background: #e2e8f0; color: #334155; }
-    .btn-print { background: var(--green); color: #fff; }
+        .canvas-wrapper {
+            max-width: 1350px;
+            margin: 0 auto;
+            overflow-x: auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
 
-    /* Lienzo del mapa */
-    .canvas-wrapper {
-      position: relative;
-      max-width: 1380px;
-      margin: 24px auto;
-      padding: 30px 20px;
-      background: #ffffff;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-    }
+        .map-container {
+            position: relative;
+            width: 1300px;
+            margin: 0 auto;
+            padding: 40px 30px 60px 30px;
+            background: #ffffff;
+        }
 
-    svg#connectors {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 1;
-    }
+        #arrows-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
 
-    .connector-label {
-      position: absolute;
-      z-index: 3;
-      background: #ffffff;
-      border: 1px solid #cbd5e1;
-      color: #0f3d4c;
-      font-size: 0.75rem;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 999px;
-      transform: translate(-50%, -50%);
-      white-space: nowrap;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-    }
+        .map-content { position: relative; z-index: 2; }
 
-    /* Niveles jerárquicos */
-    .level {
-      position: relative;
-      z-index: 2;
-      display: flex;
-      justify-content: center;
-      gap: 22px;
-      margin-bottom: 64px;
-      flex-wrap: wrap;
-    }
+        .node {
+            background: var(--node-bg);
+            border: 2px solid var(--secondary);
+            border-radius: 10px;
+            padding: 12px 16px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+        }
 
-    .level:last-child { margin-bottom: 10px; }
+        .node:focus-within {
+            outline: 3px solid rgba(37, 99, 235, 0.3);
+        }
 
-    /* Nodos / Conceptos */
-    .node {
-      background: #ffffff;
-      border: 2px solid var(--primary);
-      border-radius: 10px;
-      padding: 14px 16px;
-      width: 240px;
-      box-shadow: 0 3px 8px rgba(15, 61, 76, 0.08);
-      transition: transform 0.15s, box-shadow 0.15s;
-    }
+        .node-question {
+            background: #eff6ff;
+            border: 2px dashed var(--primary);
+            max-width: 680px;
+            margin: 0 auto;
+            text-align: center;
+        }
 
-    .node.root {
-      width: 680px;
-      background: var(--primary);
-      color: #ffffff;
-      text-align: center;
-    }
+        .node-main {
+            background: var(--primary);
+            color: white;
+            border: none;
+            max-width: 440px;
+            margin: 0 auto;
+            text-align: center;
+        }
 
-    .node.root .node-title { color: #fde68a; font-size: 1.05rem; }
-    .node.root .node-body { color: #f8fafc; font-size: 0.9rem; }
+        .node-main .node-title { color: #ffffff; font-size: 1.2rem; }
+        .node-title { font-weight: 700; font-size: 0.96rem; color: var(--primary); margin-bottom: 5px; display: block; }
+        .node-text { font-size: 0.85rem; line-height: 1.45; color: var(--text-main); }
+        .node-main .node-text { color: #e2e8f0; }
 
-    .node.question {
-      width: 620px;
-      background: var(--accent-light);
-      border-color: var(--accent);
-      text-align: center;
-    }
+        .connector-label {
+            display: inline-block;
+            background: #f8fafc;
+            border: 1.5px solid #94a3b8;
+            color: #334155;
+            font-size: 0.78rem;
+            font-weight: 700;
+            font-style: italic;
+            padding: 4px 12px;
+            border-radius: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            text-align: center;
+            min-width: 110px;
+        }
 
-    .node.highlight {
-      background: var(--primary-light);
-    }
+        .connector-row { display: flex; justify-content: center; margin: 32px 0; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; margin-top: 35px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 35px; margin-top: 35px; }
+        .column-branch { display: flex; flex-direction: column; align-items: center; gap: 32px; }
+        .column-branch .node { width: 100%; }
 
-    .node.green {
-      background: var(--green-light);
-      border-color: var(--green);
-    }
+        .node-teal { border-color: var(--accent); }
+        .node-teal .node-title { color: var(--accent); }
+        .node-amber { border-color: var(--highlight); }
+        .node-amber .node-title { color: var(--highlight); }
 
-    .node.wide { width: 360px; }
+        .sub-list { margin-top: 6px; padding-left: 18px; font-size: 0.83rem; }
+        .sub-list li { margin-bottom: 3px; }
+        [contenteditable="true"] { cursor: text; }
 
-    .node-title {
-      font-weight: 700;
-      font-size: 0.88rem;
-      color: var(--primary);
-      margin-bottom: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-
-    .node.green .node-title { color: var(--green); }
-    .node.question .node-title { color: #92400e; }
-
-    .node-body {
-      font-size: 0.82rem;
-      line-height: 1.45;
-      color: #334155;
-    }
-
-    /* Estilos cuando el modo edición está activo */
-    body.editing [contenteditable="true"] {
-      outline: 2px dashed #d97706;
-      background-color: rgba(254, 243, 199, 0.45);
-      border-radius: 4px;
-      padding: 2px 4px;
-      cursor: text;
-    }
-
-    .footer-note {
-      text-align: center;
-      font-size: 0.78rem;
-      color: #64748b;
-      margin-top: 25px;
-      position: relative;
-      z-index: 2;
-    }
-
-    @media print {
-      .toolbar { display: none; }
-      .canvas-wrapper { box-shadow: none; margin: 0; width: 100%; max-width: 100%; }
-      body { background: #fff; }
-    }
-  </style>
+        @media print {
+            body { background: white; padding: 0; }
+            .toolbar { display: none !important; }
+            .canvas-wrapper { box-shadow: none; overflow: visible; }
+            .map-container { width: 100%; padding: 10px; }
+        }
+    </style>
 </head>
 <body>
-
-  <div class="toolbar">
-    <h1>Mapa Conceptual Interactivo · GTC 45 (Segunda Actualización, 2012)</h1>
-    <div class="controls">
-      <button id="toggleEdit" class="btn-edit">✏️ Activar Edición</button>
-      <button id="resetBtn" class="btn-reset">↺ Restaurar Original</button>
-      <button onclick="window.print()" class="btn-print">🖨️ Guardar PDF / Imprimir</button>
-    </div>
-  </div>
-
-  <div class="canvas-wrapper" id="canvas">
-    <svg id="connectors"></svg>
-    <div id="labels-layer"></div>
-
-    <!-- NIVEL 1: DEFINICIÓN BASE -->
-    <div class="level">
-      <div class="node root" id="n-gtc">
-        <div class="node-title editable">GTC 45 · GUÍA TÉCNICA COLOMBIANA (2012)</div>
-        <div class="node-body editable">
-          Directriz metodológica para la <strong>identificación de los peligros</strong>, la <strong>valoración de los riesgos</strong> y la determinación de controles en seguridad y salud ocupacional, adaptable a las necesidades de cada organización.
+    <div class="toolbar">
+        <div class="toolbar-info">
+            <h2>Mapa Conceptual Interactivo: GTC 45</h2>
+            <p>Haz clic en cualquier cuadro o conector para editar el texto. Las flechas se ajustan solas.</p>
         </div>
-      </div>
-    </div>
-
-    <!-- NIVEL 2: PREGUNTA ORIENTADORA -->
-    <div class="level">
-      <div class="node question" id="n-pregunta">
-        <div class="node-title editable">Pregunta Orientadora</div>
-        <div class="node-body editable">
-          ¿Cómo identificar los peligros y valorar los riesgos para decidir qué controles implementar en los procesos de la organización?
+        <div class="toolbar-actions">
+            <button class="btn-save" onclick="saveMap()">💾 Guardar cambios</button>
+            <button class="btn-jpg" onclick="downloadJPG()">🖼️ Descargar JPG</button>
+            <button class="btn-pdf" onclick="window.print()">📄 Guardar PDF / Imprimir</button>
+            <button class="btn-reset" onclick="resetMap()">↺ Restaurar</button>
         </div>
-      </div>
     </div>
 
-    <!-- NIVEL 3: CONCEPTOS FUNDAMENTALES -->
-    <div class="level">
-      <div class="node highlight" id="n-peligro">
-        <div class="node-title editable">1. Peligro</div>
-        <div class="node-body editable">Fuente, situación o acto con potencial de causar daño en términos de lesión o enfermedad.</div>
-      </div>
-      <div class="node highlight" id="n-exposicion">
-        <div class="node-title editable">2. Exposición</div>
-        <div class="node-body editable">Situación en la cual las personas se encuentran en contacto con los peligros.</div>
-      </div>
-      <div class="node highlight" id="n-riesgo">
-        <div class="node-title editable">3. Riesgo</div>
-        <div class="node-body editable">Combinación de la probabilidad de que ocurra un evento o exposición peligrosa y la severidad del daño.</div>
-      </div>
-      <div class="node highlight" id="n-valoracion">
-        <div class="node-title editable">4. Valoración del Riesgo</div>
-        <div class="node-body editable">Proceso de evaluar el riesgo que surge de un peligro, teniendo en cuenta los controles existentes, y decidir si es aceptable.</div>
-      </div>
-    </div>
+    <div class="canvas-wrapper">
+        <div class="map-container" id="map-area">
+            <svg id="arrows-svg">
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#64748b" />
+                    </marker>
+                </defs>
+            </svg>
 
-    <!-- NIVEL 4: RUTA METODOLÓGICA (FIGURA 1) -->
-    <div class="level">
-      <div class="node" id="n-paso1">
-        <div class="node-title editable">Paso 1 · Instrumento</div>
-        <div class="node-body editable">Definir un instrumento (matriz o formato de inspección) para recolectar y actualizar información.</div>
-      </div>
-      <div class="node" id="n-paso2">
-        <div class="node-title editable">Paso 2 · Clasificar</div>
-        <div class="node-body editable">Clasificar procesos, actividades y tareas (rutinarias y no rutinarias), instalaciones y personal.</div>
-      </div>
-      <div class="node" id="n-paso3">
-        <div class="node-title editable">Paso 3 · Identificar Peligros</div>
-        <div class="node-body editable">Reconocer los peligros de cada actividad y determinar quién, cuándo y cómo puede resultar afectado.</div>
-      </div>
-      <div class="node" id="n-paso4">
-        <div class="node-title editable">Paso 4 · Controles Existentes</div>
-        <div class="node-body editable">Identificar y registrar los controles actuales implementados para cada peligro detectado.</div>
-      </div>
-      <div class="node" id="n-paso5">
-        <div class="node-title editable">Paso 5 · Evaluar el Riesgo</div>
-        <div class="node-body editable">Calificar el riesgo considerando la eficacia de controles, probabilidad y consecuencias si fallan.</div>
-      </div>
-    </div>
+            <div class="map-content">
+                <div id="n-question" class="node node-question" contenteditable="true">
+                    <span class="node-title">Pregunta Orientadora</span>
+                    <div class="node-text">¿Cómo se identifican los peligros y se valoran los riesgos laborales en Colombia según la norma técnica?</div>
+                </div>
 
-    <!-- NIVEL 5: DETALLE TÉCNICO DE LOS PASOS -->
-    <div class="level">
-      <div class="node wide green" id="n-anexob">
-        <div class="node-title editable">Registro en Matriz (Anexo B)</div>
-        <div class="node-body editable">
-          Proceso, zona/lugar, actividad, tarea, rutinaria (sí/no), peligro (descripción y clasificación), efectos posibles, controles existentes, evaluación, aceptabilidad y medidas de intervención.
+                <div class="connector-row">
+                    <span id="c-1" class="connector-label" contenteditable="true">se responde mediante la</span>
+                </div>
+
+                <div id="n-main" class="node node-main" contenteditable="true">
+                    <span class="node-title">GTC 45</span>
+                    <div class="node-text">Guía Técnica Colombiana para la identificación de los peligros y la valoración de los riesgos en seguridad y salud ocupacional.</div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="column-branch">
+                        <span id="c-left-1" class="connector-label" contenteditable="true">inicia con un</span>
+                        <div id="n-instrument" class="node node-teal" contenteditable="true">
+                            <span class="node-title">1. Instrumento de Recolección de Información</span>
+                            <div class="node-text">Herramienta sistemática para levantar datos reales de los procesos, actividades y tareas de la organización.</div>
+                        </div>
+
+                        <span id="c-left-2" class="connector-label" contenteditable="true">se materializa a través de un</span>
+                        <div id="n-format" class="node node-teal" contenteditable="true">
+                            <span class="node-title">Formato de Inspección / Matriz</span>
+                            <div class="node-text">Consigna características clave:
+                                <ul class="sub-list">
+                                    <li>Procesos, zonas y actividades (rutinarias o no).</li>
+                                    <li>Clasificación del peligro y efectos posibles.</li>
+                                    <li>Controles existentes (fuente, medio, individuo).</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="column-branch">
+                        <span id="c-right-1" class="connector-label" contenteditable="true">permite ejecutar la</span>
+                        <div id="n-valuation" class="node" contenteditable="true">
+                            <span class="node-title">2. Valoración del Riesgo</span>
+                            <div class="node-text">Proceso de evaluar el riesgo que surge de un peligro, teniendo en cuenta la suficiencia de los controles existentes y decidiendo si es aceptable o no.</div>
+                        </div>
+
+                        <span id="c-right-2" class="connector-label" contenteditable="true">se fundamenta en definir qué es</span>
+                        <div id="n-risk-def" class="node" contenteditable="true">
+                            <span class="node-title">El Riesgo (R)</span>
+                            <div class="node-text">Combinación de la probabilidad de que ocurra un evento o exposición peligrosa y la severidad de la lesión o enfermedad que puede causar.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="connector-row">
+                    <span id="c-eval" class="connector-label" contenteditable="true">se calcula y evalúa mediante tres variables</span>
+                </div>
+
+                <div class="grid-3">
+                    <div class="column-branch">
+                        <span id="c-prob" class="connector-label" contenteditable="true">primero determina el</span>
+                        <div id="n-prob" class="node node-amber" contenteditable="true">
+                            <span class="node-title">Nivel de Probabilidad (NP)</span>
+                            <div class="node-text">Grado de posibilidad de que ocurra el evento. Se obtiene multiplicando:<br><strong>NP = Nivel de Deficiencia (ND) × Nivel de Exposición (NE)</strong>.</div>
+                        </div>
+                    </div>
+
+                    <div class="column-branch">
+                        <span id="c-cons" class="connector-label" contenteditable="true">luego cruza con el</span>
+                        <div id="n-cons" class="node node-amber" contenteditable="true">
+                            <span class="node-title">Nivel de Consecuencia (NC)</span>
+                            <div class="node-text">Medida de la severidad de los daños físicos o materiales más graves razonablemente posibles (Leve, Grave, Muy Grave, Mortal).</div>
+                        </div>
+                    </div>
+
+                    <div class="column-branch">
+                        <span id="c-nr" class="connector-label" contenteditable="true">generando el</span>
+                        <div id="n-nr" class="node node-amber" contenteditable="true">
+                            <span class="node-title">Nivel de Riesgo (NR) e Intervención</span>
+                            <div class="node-text">Magnitud resultante de:<br><strong>NR = NP × NC</strong>.<br>Determina la aceptabilidad del riesgo (I, II, III, IV) y prioriza las medidas de control.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="connector-row">
+                    <span id="c-final" class="connector-label" contenteditable="true">culmina en la toma de decisiones para la</span>
+                </div>
+
+                <div id="n-gestion" class="node node-main" style="max-width: 650px;" contenteditable="true">
+                    <span class="node-title">Gestión del Riesgo y Medidas de Intervención</span>
+                    <div class="node-text">Eliminación, sustitución, controles de ingeniería, controles administrativos y Equipos de Protección Personal (EPP).</div>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="node wide green" id="n-detalle-peligro">
-        <div class="node-title editable">Caracterización del Peligro</div>
-        <div class="node-body editable">
-          Describir la fuente, situación o acto; clasificarlo según la tabla de peligros (<strong>Anexo A</strong>); precisar efectos posibles y número de expuestos.
-        </div>
-      </div>
-      <div class="node wide green" id="n-fuente-medio">
-        <div class="node-title editable">Niveles de Control Actual</div>
-        <div class="node-body editable">
-          <strong>Fuente:</strong> actúa sobre el origen del peligro.<br>
-          <strong>Medio:</strong> interviene el entorno o vía de transmisión.<br>
-          <strong>Individuo:</strong> protege directamente al trabajador.
-        </div>
-      </div>
     </div>
+    <script>
+        const STORAGE_KEY = 'mapa_gtc45_v2';
+        const mapArea = document.getElementById('map-area');
+        const svg = document.getElementById('arrows-svg');
 
+        const connections = [
+            ['n-question', 'c-1'],
+            ['c-1', 'n-main'],
+            ['n-main', 'c-left-1'],
+            ['c-left-1', 'n-instrument'],
+            ['n-instrument', 'c-left-2'],
+            ['c-left-2', 'n-format'],
+            ['n-main', 'c-right-1'],
+            ['c-right-1', 'n-valuation'],
+            ['n-valuation', 'c-right-2'],
+            ['c-right-2', 'n-risk-def'],
+            ['n-format', 'c-eval'],
+            ['n-risk-def', 'c-eval'],
+            ['c-eval', 'c-prob'],
+            ['c-prob', 'n-prob'],
+            ['c-eval', 'c-cons'],
+            ['c-cons', 'n-cons'],
+            ['c-eval', 'c-nr'],
+            ['c-nr', 'n-nr'],
+            ['n-prob', 'c-final'],
+            ['n-cons', 'c-final'],
+            ['n-nr', 'c-final'],
+            ['c-final', 'n-gestion']
+        ];
+
+        function drawArrows() {
+            const defs = svg.querySelector('defs');
+            svg.innerHTML = '';
+            svg.appendChild(defs);
+
+            const containerRect = mapArea.getBoundingClientRect();
+
+            connections.forEach(([fromId, toId]) => {
+                const fromEl = document.getElementById(fromId);
+                const toEl = document.getElementById(toId);
+                if (!fromEl || !toEl) return;
+
+                const fromRect = fromEl.getBoundingClientRect();
+                const toRect = toEl.getBoundingClientRect();
+
+                const startX = (fromRect.left - containerRect.left) + (fromRect.width / 2);
+                const startY = (fromRect.bottom - containerRect.top);
+                const endX = (toRect.left - containerRect.left) + (toRect.width / 2);
+                const endY = (toRect.top - containerRect.top);
+
+                const path = document.createElementNS('http://w3.org', 'path');
+                const midY = (startY + endY) / 2;
+                const d = `M ${startX} ${startY} C ${startX} ${midY}, ${endX} ${midY}, ${endX} ${endY - 3}`;
+
+                path.setAttribute('d', d);
+                path.setAttribute('stroke', '#64748b');
+                path.setAttribute('stroke-width', '2');
+                path.setAttribute('fill', 'none');
+                path.setAttribute('marker-end', 'url(#arrowhead)');
+
+                svg.appendChild(path);
+            });
+        }
+
+        function downloadJPG() {
+            if (document.activeElement) document.activeElement.blur();
+
+            html2canvas(mapArea, {
+                scale: 2,
+                backgroundColor: '#ffffff',
+                useCORS: true
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'Mapa_Conceptual_GTC45.jpg';
+                link.href = canvas.toDataURL('image/jpeg', 0.95);
+                link.click();
+            });
+        }
+
+        function saveMap() {
+            localStorage.setItem(STORAGE_KEY, document.querySelector('.map-content').innerHTML);
+            alert('¡Cambios guardados en tu navegador!');
+        }
+
+        function resetMap() {
+            if (confirm('¿Deseas restaurar el mapa conceptual al texto original?')) {
+                localStorage.removeItem(STORAGE_KEY);
+                location.reload();
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                document.querySelector('.map-content').innerHTML = saved;
+            }
+            drawArrows();
+        });
+
+        document.querySelector('.map-content').addEventListener('input', drawArrows);
+        window.addEventListener('resize', drawArrows);
+    </script>
+</body>
+</html>
