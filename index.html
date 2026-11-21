@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mapa Conceptual - GTC 45</title>
-    <script src="https://cloudflare.com"></script>
     <style>
         :root {
             --bg-color: #f4f7f9;
@@ -13,7 +12,7 @@
             --accent: #0d9488;
             --highlight: #d97706;
             --node-bg: #ffffff;
-            --text-main: #1e293b;
+            --text-main: #0f172a;
             --text-muted: #475569;
         }
 
@@ -22,38 +21,40 @@
             margin: 0;
             padding: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
 
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
-            padding: 20px;
+            padding: 15px;
         }
 
         .toolbar {
-            max-width: 1350px;
-            margin: 0 auto 20px auto;
+            max-width: 1120px;
+            margin: 0 auto 15px auto;
             background: #ffffff;
-            padding: 15px 25px;
+            padding: 12px 20px;
             border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
-            gap: 15px;
+            gap: 10px;
         }
 
-        .toolbar-info h2 { font-size: 1.15rem; color: var(--primary); }
-        .toolbar-info p { font-size: 0.85rem; color: var(--text-muted); }
-        .toolbar-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+        .toolbar-info h2 { font-size: 1.05rem; color: var(--primary); }
+        .toolbar-info p { font-size: 0.8rem; color: var(--text-muted); }
+        .toolbar-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
         button {
-            padding: 10px 16px;
+            padding: 8px 14px;
             border: none;
             border-radius: 6px;
             font-weight: 600;
-            font-size: 0.88rem;
+            font-size: 0.82rem;
             cursor: pointer;
             transition: all 0.2s ease;
         }
@@ -68,19 +69,19 @@
         .btn-reset:hover { background-color: #fecaca; }
 
         .canvas-wrapper {
-            max-width: 1350px;
+            max-width: 1120px;
             margin: 0 auto;
             overflow-x: auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
         }
 
         .map-container {
             position: relative;
-            width: 1300px;
+            width: 1100px;
             margin: 0 auto;
-            padding: 40px 30px 60px 30px;
+            padding: 22px 24px 28px 24px;
             background: #ffffff;
         }
 
@@ -88,83 +89,90 @@
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
+            width: 1100px;
             height: 100%;
             pointer-events: none;
             z-index: 1;
         }
 
-        .map-content { position: relative; z-index: 2; }
+        .map-content {
+            position: relative;
+            z-index: 2;
+        }
 
         .node {
             background: var(--node-bg);
             border: 2px solid var(--secondary);
-            border-radius: 10px;
-            padding: 12px 16px;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            padding: 8px 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.04);
         }
 
         .node:focus-within {
-            outline: 3px solid rgba(37, 99, 235, 0.3);
+            outline: 2px solid rgba(37, 99, 235, 0.4);
         }
 
         .node-question {
             background: #eff6ff;
             border: 2px dashed var(--primary);
-            max-width: 680px;
+            max-width: 620px;
             margin: 0 auto;
             text-align: center;
         }
 
         .node-main {
             background: var(--primary);
-            color: white;
-            border: none;
-            max-width: 440px;
+            color: #ffffff;
+            border: 2px solid var(--primary);
+            max-width: 460px;
             margin: 0 auto;
             text-align: center;
         }
 
-        .node-main .node-title { color: #ffffff; font-size: 1.2rem; }
-        .node-title { font-weight: 700; font-size: 0.96rem; color: var(--primary); margin-bottom: 5px; display: block; }
-        .node-text { font-size: 0.85rem; line-height: 1.45; color: var(--text-main); }
-        .node-main .node-text { color: #e2e8f0; }
+        .node-main .node-title { color: #ffffff; font-size: 1rem; }
+        .node-title { font-weight: 700; font-size: 0.86rem; color: var(--primary); margin-bottom: 3px; display: block; }
+        .node-text { font-size: 0.77rem; line-height: 1.32; color: var(--text-main); }
+        .node-main .node-text { color: #f1f5f9; }
 
         .connector-label {
             display: inline-block;
             background: #f8fafc;
-            border: 1.5px solid #94a3b8;
-            color: #334155;
-            font-size: 0.78rem;
+            border: 1.5px solid #0f172a;
+            color: #0f172a;
+            font-size: 0.72rem;
             font-weight: 700;
             font-style: italic;
-            padding: 4px 12px;
-            border-radius: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            padding: 2px 10px;
+            border-radius: 14px;
             text-align: center;
-            min-width: 110px;
+            min-width: 95px;
         }
 
-        .connector-row { display: flex; justify-content: center; margin: 32px 0; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; margin-top: 35px; }
-        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 35px; margin-top: 35px; }
-        .column-branch { display: flex; flex-direction: column; align-items: center; gap: 32px; }
+        .connector-row { display: flex; justify-content: center; margin: 18px 0; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 45px; margin-top: 20px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 20px; }
+        .column-branch { display: flex; flex-direction: column; align-items: center; gap: 18px; }
         .column-branch .node { width: 100%; }
 
-        .node-teal { border-color: var(--accent); }
-        .node-teal .node-title { color: var(--accent); }
-        .node-amber { border-color: var(--highlight); }
-        .node-amber .node-title { color: var(--highlight); }
+        .node-teal { border-color: var(--accent); background: #f0fdfa; }
+        .node-teal .node-title { color: #0f766e; }
+        .node-amber { border-color: var(--highlight); background: #fffbeb; }
+        .node-amber .node-title { color: #b45309; }
 
-        .sub-list { margin-top: 6px; padding-left: 18px; font-size: 0.83rem; }
-        .sub-list li { margin-bottom: 3px; }
+        .sub-list { margin-top: 4px; padding-left: 16px; font-size: 0.75rem; }
+        .sub-list li { margin-bottom: 2px; }
         [contenteditable="true"] { cursor: text; }
 
+        @page {
+            size: letter landscape;
+            margin: 6mm;
+        }
+
         @media print {
-            body { background: white; padding: 0; }
+            body { background: #ffffff; padding: 0; margin: 0; }
             .toolbar { display: none !important; }
-            .canvas-wrapper { box-shadow: none; overflow: visible; }
-            .map-container { width: 100%; padding: 10px; }
+            .canvas-wrapper { box-shadow: none; overflow: visible; max-width: 100%; }
+            .map-container { width: 1050px; padding: 10px; transform: scale(0.95); transform-origin: top center; }
         }
     </style>
 </head>
@@ -172,27 +180,21 @@
     <div class="toolbar">
         <div class="toolbar-info">
             <h2>Mapa Conceptual Interactivo: GTC 45</h2>
-            <p>Haz clic en cualquier cuadro o conector para editar el texto. Las flechas se ajustan solas.</p>
+            <p>Haz clic en cualquier cuadro o conector para editar. Las flechas se actualizan solas.</p>
         </div>
         <div class="toolbar-actions">
-            <button class="btn-save" onclick="saveMap()">💾 Guardar cambios</button>
+            <button class="btn-save" onclick="saveMap()">💾 Guardar</button>
             <button class="btn-jpg" onclick="downloadJPG()">🖼️ Descargar JPG</button>
-            <button class="btn-pdf" onclick="window.print()">📄 Guardar PDF / Imprimir</button>
+            <button class="btn-pdf" onclick="window.print()">📄 Imprimir / PDF (1 Hoja)</button>
             <button class="btn-reset" onclick="resetMap()">↺ Restaurar</button>
         </div>
     </div>
 
     <div class="canvas-wrapper">
         <div class="map-container" id="map-area">
-            <svg id="arrows-svg">
-                <defs>
-                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-                        <polygon points="0 0, 10 3.5, 0 7" fill="#64748b" />
-                    </marker>
-                </defs>
-            </svg>
+            <svg id="arrows-svg" xmlns="http://w3.org"></svg>
 
-            <div class="map-content">
+            <div class="map-content" id="map-content">
                 <div id="n-question" class="node node-question" contenteditable="true">
                     <span class="node-title">Pregunta Orientadora</span>
                     <div class="node-text">¿Cómo se identifican los peligros y se valoran los riesgos laborales en Colombia según la norma técnica?</div>
@@ -252,7 +254,7 @@
                         <span id="c-prob" class="connector-label" contenteditable="true">primero determina el</span>
                         <div id="n-prob" class="node node-amber" contenteditable="true">
                             <span class="node-title">Nivel de Probabilidad (NP)</span>
-                            <div class="node-text">Grado de posibilidad de que ocurra el evento. Se obtiene multiplicando:<br><strong>NP = Nivel de Deficiencia (ND) × Nivel de Exposición (NE)</strong>.</div>
+                            <div class="node-text">Posibilidad de que ocurra el evento.<br><strong>NP = Nivel de Deficiencia (ND) × Nivel de Exposición (NE)</strong>.</div>
                         </div>
                     </div>
 
@@ -260,7 +262,7 @@
                         <span id="c-cons" class="connector-label" contenteditable="true">luego cruza con el</span>
                         <div id="n-cons" class="node node-amber" contenteditable="true">
                             <span class="node-title">Nivel de Consecuencia (NC)</span>
-                            <div class="node-text">Medida de la severidad de los daños físicos o materiales más graves razonablemente posibles (Leve, Grave, Muy Grave, Mortal).</div>
+                            <div class="node-text">Severidad de los daños físicos o materiales más graves posibles (Leve, Grave, Muy Grave, Mortal).</div>
                         </div>
                     </div>
 
@@ -268,7 +270,7 @@
                         <span id="c-nr" class="connector-label" contenteditable="true">generando el</span>
                         <div id="n-nr" class="node node-amber" contenteditable="true">
                             <span class="node-title">Nivel de Riesgo (NR) e Intervención</span>
-                            <div class="node-text">Magnitud resultante de:<br><strong>NR = NP × NC</strong>.<br>Determina la aceptabilidad del riesgo (I, II, III, IV) y prioriza las medidas de control.</div>
+                            <div class="node-text">Magnitud: <strong>NR = NP × NC</strong>.<br>Determina la aceptabilidad (I, II, III, IV) y prioriza controles.</div>
                         </div>
                     </div>
                 </div>
@@ -284,9 +286,10 @@
             </div>
         </div>
     </div>
-        <script>
-        const STORAGE_KEY = 'mapa_gtc45_v3';
+    <script>
+        const STORAGE_KEY = 'mapa_gtc45_v4';
         const mapArea = document.getElementById('map-area');
+        const mapContent = document.getElementById('map-content');
         const svg = document.getElementById('arrows-svg');
 
         const connections = [
@@ -315,73 +318,95 @@
         ];
 
         function drawArrows() {
-            const width = mapArea.scrollWidth;
-            const height = mapArea.scrollHeight;
-            svg.setAttribute('width', width);
-            svg.setAttribute('height', height);
-            svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+            const w = mapArea.offsetWidth;
+            const h = mapArea.offsetHeight;
+            svg.setAttribute('width', w);
+            svg.setAttribute('height', h);
+            svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
 
-            // Reconstruir definiciones de punta de flecha de forma segura
-            svg.innerHTML = `
+            let svgContent = `
                 <defs>
-                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="8" refY="3.5" orient="auto">
-                        <polygon points="0 0, 10 3.5, 0 7" fill="#475569" />
+                    <marker id="arrow-black" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                        <path d="M0,0 L0,6 L9,3 z" fill="#0f172a" />
                     </marker>
                 </defs>
             `;
 
-            const containerRect = mapArea.getBoundingClientRect();
+            const baseRect = mapArea.getBoundingClientRect();
 
             connections.forEach(([fromId, toId]) => {
                 const fromEl = document.getElementById(fromId);
                 const toEl = document.getElementById(toId);
                 if (!fromEl || !toEl) return;
 
-                const fromRect = fromEl.getBoundingClientRect();
-                const toRect = toEl.getBoundingClientRect();
+                const r1 = fromEl.getBoundingClientRect();
+                const r2 = toEl.getBoundingClientRect();
 
-                const startX = (fromRect.left - containerRect.left) + (fromRect.width / 2);
-                const startY = (fromRect.bottom - containerRect.top);
-                const endX = (toRect.left - containerRect.left) + (toRect.width / 2);
-                const endY = (toRect.top - containerRect.top);
+                const x1 = (r1.left - baseRect.left) + (r1.width / 2);
+                const y1 = (r1.bottom - baseRect.top);
+                const x2 = (r2.left - baseRect.left) + (r2.width / 2);
+                const y2 = (r2.top - baseRect.top);
 
-                const path = document.createElementNS('http://w3.org', 'path');
-                const midY = (startY + endY) / 2;
-                const d = `M ${startX} ${startY} C ${startX} ${midY}, ${endX} ${midY}, ${endX} ${endY - 4}`;
+                const midY = (y1 + y2) / 2;
+                const d = `M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2 - 3}`;
 
-                path.setAttribute('d', d);
-                path.setAttribute('stroke', '#475569');
-                path.setAttribute('stroke-width', '2.5');
-                path.setAttribute('fill', 'none');
-                path.setAttribute('marker-end', 'url(#arrowhead)');
-
-                svg.appendChild(path);
+                svgContent += `<path d="${d}" stroke="#0f172a" stroke-width="2.2" fill="none" marker-end="url(#arrow-black)" />`;
             });
+
+            svg.innerHTML = svgContent;
         }
 
         function downloadJPG() {
             if (document.activeElement) document.activeElement.blur();
             drawArrows();
 
-            html2canvas(mapArea, {
-                scale: 2,
-                backgroundColor: '#ffffff',
-                useCORS: true
-            }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = 'Mapa_Conceptual_GTC45.jpg';
-                link.href = canvas.toDataURL('image/jpeg', 0.95);
-                link.click();
-            });
+            const w = mapArea.offsetWidth;
+            const h = mapArea.offsetHeight;
+
+            // Captura nativa mediante SVG foreignObject (sin librerías externas)
+            const clone = mapArea.cloneNode(true);
+            const styles = Array.from(document.querySelectorAll('style')).map(s => s.outerHTML).join('');
+            const htmlStr = `
+                <svg xmlns="http://w3.org" width="${w}" height="${h}">
+                    <foreignObject width="100%" height="100%">
+                        <div xmlns="http://w3.org" style="background:#ffffff; width:${w}px; height:${h}px;">
+                            ${styles}
+                            ${clone.outerHTML}
+                        </div>
+                    </foreignObject>
+                </svg>
+            `;
+
+            const img = new Image();
+            const svgBlob = new Blob([htmlStr], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(svgBlob);
+
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                canvas.width = w * 2;
+                canvas.height = h * 2;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.scale(2, 2);
+                ctx.drawImage(img, 0, 0);
+                URL.revokeObjectURL(url);
+
+                const a = document.createElement('a');
+                a.download = 'Mapa_Conceptual_GTC45.jpg';
+                a.href = canvas.toDataURL('image/jpeg', 0.95);
+                a.click();
+            };
+            img.src = url;
         }
 
         function saveMap() {
-            localStorage.setItem(STORAGE_KEY, document.querySelector('.map-content').innerHTML);
+            localStorage.setItem(STORAGE_KEY, mapContent.innerHTML);
             alert('¡Cambios guardados en tu navegador!');
         }
 
         function resetMap() {
-            if (confirm('¿Deseas restaurar el mapa conceptual al texto original?')) {
+            if (confirm('¿Restaurar el mapa al texto original?')) {
                 localStorage.removeItem(STORAGE_KEY);
                 location.reload();
             }
@@ -389,15 +414,12 @@
 
         window.addEventListener('load', () => {
             const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) {
-                document.querySelector('.map-content').innerHTML = saved;
-            }
-            setTimeout(drawArrows, 100);
+            if (saved) mapContent.innerHTML = saved;
+            setTimeout(drawArrows, 150);
         });
 
-        document.querySelector('.map-content').addEventListener('input', drawArrows);
+        mapContent.addEventListener('input', drawArrows);
         window.addEventListener('resize', drawArrows);
     </script>
 </body>
 </html>
-
