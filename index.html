@@ -284,8 +284,8 @@
             </div>
         </div>
     </div>
-    <script>
-        const STORAGE_KEY = 'mapa_gtc45_v2';
+        <script>
+        const STORAGE_KEY = 'mapa_gtc45_v3';
         const mapArea = document.getElementById('map-area');
         const svg = document.getElementById('arrows-svg');
 
@@ -315,9 +315,20 @@
         ];
 
         function drawArrows() {
-            const defs = svg.querySelector('defs');
-            svg.innerHTML = '';
-            svg.appendChild(defs);
+            const width = mapArea.scrollWidth;
+            const height = mapArea.scrollHeight;
+            svg.setAttribute('width', width);
+            svg.setAttribute('height', height);
+            svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+
+            // Reconstruir definiciones de punta de flecha de forma segura
+            svg.innerHTML = `
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="8" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#475569" />
+                    </marker>
+                </defs>
+            `;
 
             const containerRect = mapArea.getBoundingClientRect();
 
@@ -336,11 +347,11 @@
 
                 const path = document.createElementNS('http://w3.org', 'path');
                 const midY = (startY + endY) / 2;
-                const d = `M ${startX} ${startY} C ${startX} ${midY}, ${endX} ${midY}, ${endX} ${endY - 3}`;
+                const d = `M ${startX} ${startY} C ${startX} ${midY}, ${endX} ${midY}, ${endX} ${endY - 4}`;
 
                 path.setAttribute('d', d);
-                path.setAttribute('stroke', '#64748b');
-                path.setAttribute('stroke-width', '2');
+                path.setAttribute('stroke', '#475569');
+                path.setAttribute('stroke-width', '2.5');
                 path.setAttribute('fill', 'none');
                 path.setAttribute('marker-end', 'url(#arrowhead)');
 
@@ -350,6 +361,7 @@
 
         function downloadJPG() {
             if (document.activeElement) document.activeElement.blur();
+            drawArrows();
 
             html2canvas(mapArea, {
                 scale: 2,
@@ -375,12 +387,12 @@
             }
         }
 
-        window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('load', () => {
             const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
                 document.querySelector('.map-content').innerHTML = saved;
             }
-            drawArrows();
+            setTimeout(drawArrows, 100);
         });
 
         document.querySelector('.map-content').addEventListener('input', drawArrows);
@@ -388,3 +400,4 @@
     </script>
 </body>
 </html>
+
